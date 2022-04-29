@@ -85,8 +85,19 @@ func Reason(reason, domain string) *errdetails.Reason {
 }
 
 // FieldViolations returns a new empty errdetails.FieldViolations.
-func FieldViolations() *errdetails.FieldViolations {
+func FieldViolations(violations ...string) *errdetails.FieldViolations {
+	vs := make([]*errdetails.FieldViolation, 0, len(violations)/2)
+	for i := 0; i < len(violations); i += 2 {
+		v := ""
+		if i+1 < len(violations) {
+			v = violations[i+1]
+		}
+		vs = append(vs, &errdetails.FieldViolation{
+			Field:     violations[i],
+			Violation: v,
+		})
+	}
 	return &errdetails.FieldViolations{
-		Violations: make([]*errdetails.FieldViolation, 0, 1),
+		Violations: vs,
 	}
 }
