@@ -1,5 +1,9 @@
 package errdetails
 
+import (
+	"time"
+)
+
 type Reason struct {
 	Reason string
 	Domain string
@@ -23,4 +27,13 @@ func (fv *FieldViolations) FieldViolation(field, violation string) *FieldViolati
 type FieldViolation struct {
 	Field     string
 	Violation string
+}
+
+type HttpStatus struct {
+	StatusCode int
+}
+
+type RequestInfo struct {
+	TraceID   string
+	Timestamp time.Time
 }

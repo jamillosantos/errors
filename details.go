@@ -2,25 +2,52 @@ package errors
 
 import (
 	"errors"
-
-	"github.com/jamillosantos/errors/errdetails"
 )
 
+// ErrorWithDetails represents an error with details attached.
 type ErrorWithDetails struct {
-	Reason  error
-	Details []interface{}
+	message string
+	details []any
 }
 
-// Wrap returns a new ErrorWithDetails with err and details set.
-func Wrap(err error, details ...interface{}) *ErrorWithDetails {
+// Error returns the error message.
+func (e *ErrorWithDetails) Error() string {
+	return e.message
+}
+
+// Details returns a list of details added to the error.
+func (e *ErrorWithDetails) Details() []any {
+	return e.details
+}
+
+// WithDetails returns a new instance of ErrorWithDetails with the given details added. The original instance won't
+// be changed.
+func (e *ErrorWithDetails) WithDetails(details ...any) *ErrorWithDetails {
+	d := e.details
+	if e.details == nil {
+		d = make([]any, 0, len(details))
+	}
 	return &ErrorWithDetails{
+		message: e.message,
+		details: append(d, details...),
+	}
+}
+
+type WrapWithDetails struct {
+	Reason  error
+	details []any
+}
+
+// Wrap returns a new WrapWithDetails with err and details set.
+func Wrap(err error, details ...interface{}) *WrapWithDetails {
+	return &WrapWithDetails{
 		Reason:  err,
-		Details: details,
+		details: details,
 	}
 }
 
 // Error returns the error message of the reason of this error with details.
-func (e *ErrorWithDetails) Error() string {
+func (e *WrapWithDetails) Error() string {
 	if e == nil || e.Reason == nil {
 		return ""
 	}
@@ -28,76 +55,50 @@ func (e *ErrorWithDetails) Error() string {
 }
 
 // WithDetails returns a copy of this errors adding the given details. The original instance won't be changed.
-func (e *ErrorWithDetails) WithDetails(details ...interface{}) *ErrorWithDetails {
-	var d []interface{}
-	if e.Details == nil {
+func (e *WrapWithDetails) WithDetails(details ...any) *WrapWithDetails {
+	var d []any
+	if e.details == nil {
 		d = details
 	} else {
-		d = append(e.Details, details...)
+		d = append(e.details, details...)
 	}
-	return &ErrorWithDetails{
+	return &WrapWithDetails{
 		Reason:  e.Reason,
-		Details: d,
+		details: d,
 	}
 }
 
-func (e *ErrorWithDetails) Is(err error) bool {
+func (e *WrapWithDetails) Is(err error) bool {
 	if e == err || e.Reason == err {
 		return true
 	}
-	if ee, ok := err.(*ErrorWithDetails); ok {
+	if ee, ok := err.(*WrapWithDetails); ok {
 		err = ee.Reason
 	}
 	return errors.Is(e.Reason, err)
 }
 
-func (e *ErrorWithDetails) As(target interface{}) bool {
-	if t, ok := target.(*ErrorWithDetails); ok {
-		t.Details = e.Details
+func (e *WrapWithDetails) As(target interface{}) bool {
+	if t, ok := target.(*WrapWithDetails); ok {
+		t.details = e.details
 		t.Reason = e.Reason
 		return true
 	}
 	return errors.As(e.Reason, target)
 }
 
-// GetDetails returns all the details contained inside of this error.
-func (e *ErrorWithDetails) GetDetails() []interface{} {
-	if len(e.Details) == 0 {
+// Details returns all the details contained inside this error.
+func (e *WrapWithDetails) Details() []any {
+	if len(e.details) == 0 {
 		return nil
 	}
-	return e.Details
+	return e.details
 }
 
 // Unwrap returns the error wrapped into this.
-func (e *ErrorWithDetails) Unwrap() error {
+func (e *WrapWithDetails) Unwrap() error {
 	if e == nil {
 		return nil
 	}
 	return e.Reason
-}
-
-// Reason returns a new errdetails.Reason with the reason initialized.
-func Reason(reason, domain string) *errdetails.Reason {
-	return &errdetails.Reason{
-		Reason: reason,
-		Domain: domain,
-	}
-}
-
-// FieldViolations returns a new empty errdetails.FieldViolations.
-func FieldViolations(violations ...string) *errdetails.FieldViolations {
-	vs := make([]*errdetails.FieldViolation, 0, len(violations)/2)
-	for i := 0; i < len(violations); i += 2 {
-		v := ""
-		if i+1 < len(violations) {
-			v = violations[i+1]
-		}
-		vs = append(vs, &errdetails.FieldViolation{
-			Field:     violations[i],
-			Violation: v,
-		})
-	}
-	return &errdetails.FieldViolations{
-		Violations: vs,
-	}
 }
