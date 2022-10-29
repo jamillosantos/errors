@@ -10,6 +10,14 @@ type ErrorWithDetails struct {
 	details []any
 }
 
+// New returns a new error with the given message and given details.
+func New(message string, details ...any) *ErrorWithDetails {
+	return &ErrorWithDetails{
+		message: message,
+		details: details,
+	}
+}
+
 // Error returns the error message.
 func (e *ErrorWithDetails) Error() string {
 	return e.message
