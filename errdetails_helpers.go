@@ -36,3 +36,10 @@ func HttpStatus(code int) *errdetails.HttpStatus {
 		StatusCode: code,
 	}
 }
+
+// InternalError returns a new errdetails.InternalError with the error initialized.
+func InternalError(err error) *errdetails.InternalError {
+	return &errdetails.InternalError{
+		Error: err,
+	}
+}
