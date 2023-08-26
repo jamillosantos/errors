@@ -37,3 +37,7 @@ type RequestInfo struct {
 	TraceID   string
 	Timestamp time.Time
 }
+
+type InternalError struct {
+	Error error
+}
