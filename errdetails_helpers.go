@@ -5,9 +5,18 @@ import (
 )
 
 // Reason returns a new errdetails.Reason with the reason initialized.
-func Reason(reason, domain string) *errdetails.Reason {
-	return &errdetails.Reason{
+func Reason(reason string, domain ...string) *errdetails.Reason {
+	r := &errdetails.Reason{
 		Reason: reason,
+	}
+	if len(domain) > 0 {
+		r.Domain = domain[0]
+	}
+	return r
+}
+
+func Domain(domain string) *errdetails.Domain {
+	return &errdetails.Domain{
 		Domain: domain,
 	}
 }
