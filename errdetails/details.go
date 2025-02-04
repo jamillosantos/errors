@@ -9,6 +9,10 @@ type Reason struct {
 	Domain string
 }
 
+type Domain struct {
+	Domain string
+}
+
 type FieldViolations struct {
 	Violations []*FieldViolation
 }
